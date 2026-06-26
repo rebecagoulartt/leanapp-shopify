@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lean App + Shopify — Project Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f0f0f0; min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 40px 16px; }
+    .dash {
+      background: #fff;
+      font-family: 'Inter', sans-serif;
+      color: #000;
+      padding: 40px;
+      width: 100%;
+      max-width: 960px;
+      border-radius: 6px;
+    }
+    .top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; border-bottom: 1px solid #ccc; padding-bottom: 20px; }
+    .brand { font-size: 22px; font-weight: 900; letter-spacing: -0.02em; color: #000; }
+    .brand-sub { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: #777; margin-top: 3px; }
+    .date-label { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #777; text-align: right; }
+    .date-val { font-size: 13px; font-weight: 700; color: #000; margin-top: 2px; text-align: right; }
+
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; margin-bottom: 28px; background: #bbb; border: 1px solid #bbb; border-radius: 4px; overflow: hidden; }
+    .kpi { background: #f2f2f2; padding: 16px 18px; }
+    .kpi-label { font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase; color: #666; margin-bottom: 8px; }
+    .kpi-val { font-size: 28px; font-weight: 900; letter-spacing: -0.03em; color: #000; line-height: 1; }
+    .kpi-val.muted { color: #444; }
+    .kpi-sub { font-size: 9px; color: #666; margin-top: 6px; font-weight: 300; }
+
+    .big-progress-wrap { margin-bottom: 28px; background: #f2f2f2; border: 1px solid #ccc; border-radius: 4px; padding: 20px 24px; }
+    .big-label { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; }
+    .big-label-text { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: #555; }
+    .big-pct { font-size: 40px; font-weight: 900; letter-spacing: -0.04em; color: #000; line-height: 1; }
+    .big-detail { font-size: 10px; color: #666; font-weight: 300; margin-top: 4px; }
+    .big-bar-bg { width: 100%; height: 6px; background: #ccc; border-radius: 1px; overflow: hidden; }
+    .big-bar-fill { height: 100%; background: #000; border-radius: 1px; }
+    .big-bar-sub { display: flex; justify-content: space-between; margin-top: 8px; }
+    .big-bar-sub span { font-size: 9px; color: #666; letter-spacing: 0.06em; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .section-label { font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; color: #666; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #ccc; }
+
+    .ms-list { display: flex; flex-direction: column; gap: 14px; }
+    .ms-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .ms-name { font-size: 11px; font-weight: 400; color: #222; }
+    .ms-pct-txt { font-size: 11px; font-weight: 700; color: #000; }
+    .ms-bar-bg { width: 100%; height: 3px; background: #ccc; border-radius: 1px; overflow: hidden; margin-bottom: 4px; }
+    .ms-bar-fill { height: 100%; background: #000; border-radius: 1px; }
+    .ms-meta { display: flex; justify-content: space-between; align-items: center; }
+    .ms-date { font-size: 8px; color: #666; letter-spacing: 0.04em; font-weight: 300; }
+    .ms-badge { font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; padding: 1px 6px; border-radius: 10px; font-weight: 400; border: 1px solid #999; color: #555; }
+
+    .hu-list { display: flex; flex-direction: column; }
+    .hu-row { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid #e0e0e0; }
+    .hu-row:last-child { border-bottom: none; }
+    .hu-name { font-size: 10px; color: #333; font-weight: 300; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hu-name.faded { color: #888; }
+    .hu-deadline { font-size: 9px; color: #555; text-align: right; white-space: nowrap; }
+    .hu-deadline.faded { color: #999; }
+    .hu-pct-mini { width: 36px; height: 3px; background: #ccc; border-radius: 1px; overflow: hidden; }
+    .hu-pct-fill { height: 100%; background: #000; border-radius: 1px; }
+
+    .go-live-bar { margin-top: 24px; background: #f2f2f2; border: 1px solid #ccc; border-radius: 4px; padding: 16px 24px; }
+    .tl-label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .tl-title { font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; color: #666; }
+    .tl-go-date { font-size: 10px; font-weight: 700; color: #000; letter-spacing: 0.06em; }
+    .tl-track { position: relative; height: 3px; background: #ccc; border-radius: 1px; margin-bottom: 20px; }
+    .tl-marker { position: absolute; top: -5px; width: 2px; height: 12px; background: #000; border-radius: 1px; }
+    .tl-marker-label { position: absolute; top: 10px; font-size: 8px; color: #000; letter-spacing: 0.08em; white-space: nowrap; transform: translateX(-50%); font-weight: 700; }
+    .tl-legend { display: flex; gap: 16px; flex-wrap: wrap; }
+    .tl-leg-item { display: flex; align-items: center; gap: 5px; font-size: 8px; color: #555; letter-spacing: 0.06em; }
+    .tl-leg-dot { width: 8px; height: 3px; border-radius: 1px; }
+
+    .footer { margin-top: 24px; border-top: 1px solid #ccc; padding-top: 12px; display: flex; justify-content: space-between; }
+    .footer span { font-size: 8px; color: #888; letter-spacing: 0.1em; text-transform: uppercase; }
+
+    @media (max-width: 640px) {
+      .dash { padding: 20px; }
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="dash">
+
+  <div class="top-bar">
+    <div>
+      <div class="brand">Lean App + Shopify</div>
+      <div class="brand-sub">Project dashboard — Integração</div>
+    </div>
+    <div>
+      <div class="date-label">Go-live</div>
+      <div class="date-val">07 / 07 / 2026</div>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">HUs concluídas</div>
+      <div class="kpi-val">22<span style="font-size:14px;font-weight:300;color:#888"> / 28</span></div>
+      <div class="kpi-sub">78.6% do total</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Em progresso</div>
+      <div class="kpi-val muted">3</div>
+      <div class="kpi-sub">HU-19, HU-20, App Config</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Não iniciadas</div>
+      <div class="kpi-val muted">6</div>
+      <div class="kpi-sub">Fase 5 + App + Backend</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Dias até go-live</div>
+      <div class="kpi-val">11</div>
+      <div class="kpi-sub">dias úteis restantes</div>
+    </div>
+  </div>
+
+  <div class="big-progress-wrap">
+    <div class="big-label">
+      <div>
+        <div class="big-label-text">Conclusão geral do projeto</div>
+        <div class="big-detail">Ponderado por esforço (dias) · 28 HUs</div>
+      </div>
+      <div class="big-pct">74%</div>
+    </div>
+    <div class="big-bar-bg"><div class="big-bar-fill" style="width:74%"></div></div>
+    <div class="big-bar-sub">
+      <span>Início — 28/04/2026</span>
+      <span>▲ go-live 07/07</span>
+      <span>Pós go-live — 13/07/2026</span>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="section-label">Milestones</div>
+      <div class="ms-list">
+
+        <div class="ms-item">
+          <div class="ms-header"><span class="ms-name">Fase 1 — Fundação</span><span class="ms-pct-txt">100%</span></div>
+          <div class="ms-bar-bg"><div class="ms-bar-fill" style="width:100%"></div></div>
+          <div class="ms-meta"><span class="ms-date">28/04 → 30/04 · 3 HUs · 1.5d</span><span class="ms-badge">Concluída</span></div>
+        </div>
+
+        <div class="ms-item">
+          <div class="ms-header"><span class="ms-name">Fase 2 — Catálogo</span><span class="ms-pct-txt">100%</span></div>
+          <div class="ms-bar-bg"><div class="ms-bar-fill" style="width:100%"></div></div>
+          <div class="ms-meta"><span class="ms-date">04/05 → 12/05 · 5 HUs · 5d</span><span class="ms-badge">Concluída</span></div>
+        </div>
+
+        <div class="ms-item">
+          <div class="ms-header"><span class="ms-name">Fase 3 — Carrinho</span><span class="ms-pct-txt">100%</span></div>
+          <div class="ms-bar-bg"><div class="ms-bar-fill" style="width:100%"></div></div>
+          <div class="ms-meta"><span class="ms-date">13/05 → 22/05 · 6 HUs · 7d</span><span class="ms-badge">Concluída</span></div>
+        </div>
+
+        <div class="ms-item">
+          <div class="ms-header"><span class="ms-name">Fase 4 — Account + Checkout</span><span class="ms-pct-txt" style="color:#444">85%</span></div>
+          <div class="ms-bar-bg"><div class="ms-bar-fill" style="width:85%;background:#444"></div></div>
+          <div class="ms-meta"><span class="ms-date">25/05 → 30/06 · 4 HUs</span><span class="ms-badge">Em progresso</span></div>
+        </div>
+
+        <div class="ms-item">
+          <div class="ms-header"><span class="ms-name">Fase 5 — Admin</span><span class="ms-pct-txt" style="color:#666">0%</span></div>
+          <div class="ms-bar-bg"><div class="ms-bar-fill" style="width:0%"></div></div>
+          <div class="ms-meta"><span class="ms-date">01/07 → 06/07 · 6 HUs · 5.5d</span><span class="ms-badge">Não iniciada</span></div>
+        </div>
+
+        <div class="ms-item">
+          <div class="ms-header"><span class="ms-name">Fase 6 — App</span><span class="ms-pct-txt" style="color:#444">60%</span></div>
+          <div class="ms-bar-bg"><div class="ms-bar-fill" style="width:60%;background:#444"></div></div>
+          <div class="ms-meta"><span class="ms-date">23/06 → 08/07 · Checkout e Backend pendentes</span><span class="ms-badge">Em progresso</span></div>
+        </div>
+
+        <div class="ms-item">
+          <div class="ms-header"><span class="ms-name">Pós go-live</span><span class="ms-pct-txt" style="color:#777">0%</span></div>
+          <div class="ms-bar-bg"><div class="ms-bar-fill" style="width:0%"></div></div>
+          <div class="ms-meta"><span class="ms-date">09/07 → 13/07 · HU-25, HU-26, HU-28</span><span class="ms-badge">Agendado</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">HUs pendentes / em andamento</div>
+      <div class="hu-list">
+        <div class="hu-row"><span class="hu-name">HU-19 — Perfil e endereços</span><span class="hu-deadline">30/06</span><div class="hu-pct-mini"><div class="hu-pct-fill" style="width:90%"></div></div></div>
+        <div class="hu-row"><span class="hu-name">HU-20 — Histórico de pedidos</span><span class="hu-deadline">30/06</span><div class="hu-pct-mini"><div class="hu-pct-fill" style="width:80%"></div></div></div>
+        <div class="hu-row"><span class="hu-name">[App] Configurações</span><span class="hu-deadline">30/06</span><div class="hu-pct-mini"><div class="hu-pct-fill" style="width:80%"></div></div></div>
+        <div class="hu-row"><span class="hu-name">HU-21 — Token administrativo</span><span class="hu-deadline">01/07</span><div class="hu-pct-mini"><div class="hu-pct-fill" style="width:0%"></div></div></div>
+        <div class="hu-row"><span class="hu-name">HU-22 — Cliente admin Shopify</span><span class="hu-deadline">02/07</span><div class="hu-pct-mini"><div class="hu-pct-fill" style="width:0%"></div></div></div>
+        <div class="hu-row"><span class="hu-name">Envio do pedido — fila</span><span class="hu-deadline">03/07</span><div class="hu-pct-mini"><div class="hu-pct-fill" style="width:0%"></div></div></div>
+        <div class="hu-row"><span class="hu-name">HU-23 — Listagem pedidos admin</span><span class="hu-deadline">06/07</span><div class="hu-pct-mini"><div class="hu-pct-fill" style="width:0%"></div></div></div>
+        <div class="hu-row"><span class="hu-name">[Backend] Identificação pedido</span><span class="hu-deadline">06/07</span><div class="hu-pct-mini"><div class="hu-pct-fill" style="width:0%"></div></div></div>
+        <div class="hu-row"><span class="hu-name">[App] Checkout</span><span class="hu-deadline">08/07</span><div class="hu-pct-mini"><div class="hu-pct-fill" style="width:0%"></div></div></div>
+        <div class="hu-row"><span class="hu-name faded">HU-25 — Push notificações</span><span class="hu-deadline faded">09/07</span><div class="hu-pct-mini"><div class="hu-pct-fill" style="width:0%"></div></div></div>
+        <div class="hu-row"><span class="hu-name faded">HU-26 — Resiliência API</span><span class="hu-deadline faded">10/07</span><div class="hu-pct-mini"><div class="hu-pct-fill" style="width:0%"></div></div></div>
+        <div class="hu-row"><span class="hu-name faded">HU-28 — Monitoramento de erros</span><span class="hu-deadline faded">13/07</span><div class="hu-pct-mini"><div class="hu-pct-fill" style="width:0%"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="go-live-bar">
+    <div class="tl-label-row">
+      <span class="tl-title">Linha do tempo — Abr a Jul 2026</span>
+      <span class="tl-go-date">▲ go-live 07/07/2026</span>
+    </div>
+    <div class="tl-track" id="tl-track"></div>
+    <div class="tl-legend">
+      <div class="tl-leg-item"><div class="tl-leg-dot" style="background:#000"></div>Concluído</div>
+      <div class="tl-leg-item"><div class="tl-leg-dot" style="background:#444"></div>Em progresso</div>
+      <div class="tl-leg-item"><div class="tl-leg-dot" style="background:#777"></div>Pendente</div>
+      <div class="tl-leg-item"><div class="tl-leg-dot" style="background:#aaa"></div>Pós go-live</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Lean App + Shopify</span>
+    <span>Jun 2026</span>
+  </div>
+
+</div>
+
+<script>
+  const rangeStart = new Date('2026-04-28');
+  const rangeEnd   = new Date('2026-07-13');
+  const total = (rangeEnd - rangeStart);
+  const goLive = new Date('2026-07-07');
+  const goLivePct = (goLive - rangeStart) / total * 100;
+
+  const phases = [
+    { s:'2026-04-28', e:'2026-04-30', color:'#000' },
+    { s:'2026-05-04', e:'2026-05-12', color:'#000' },
+    { s:'2026-05-13', e:'2026-05-22', color:'#000' },
+    { s:'2026-05-25', e:'2026-06-30', color:'#444' },
+    { s:'2026-06-23', e:'2026-07-08', color:'#555' },
+    { s:'2026-07-01', e:'2026-07-06', color:'#777' },
+    { s:'2026-07-09', e:'2026-07-13', color:'#aaa' },
+  ];
+
+  const track = document.getElementById('tl-track');
+
+  phases.forEach(p => {
+    const s = new Date(p.s), e = new Date(p.e);
+    const left = (s - rangeStart) / total * 100;
+    const width = (e - s + 86400000) / total * 100;
+    const bar = document.createElement('div');
+    bar.style.cssText = `position:absolute;top:0;height:3px;left:${left.toFixed(2)}%;width:${width.toFixed(2)}%;background:${p.color};border-radius:1px`;
+    track.appendChild(bar);
+  });
+
+  const marker = document.createElement('div');
+  marker.className = 'tl-marker';
+  marker.style.left = goLivePct.toFixed(2) + '%';
+  track.appendChild(marker);
+
+  const mlabel = document.createElement('div');
+  mlabel.className = 'tl-marker-label';
+  mlabel.style.left = goLivePct.toFixed(2) + '%';
+  mlabel.textContent = '07/07';
+  track.appendChild(mlabel);
+</script>
+</body>
+</html>
